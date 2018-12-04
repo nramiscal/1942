@@ -1,0 +1,194 @@
+<html>
+<head>
+	<title>1942 Game</title>
+
+<style type="text/css">
+	body{
+		background-color:black;
+	}
+	#container{
+		background: url('background.jpg');
+		width:1000px;
+		height:550px;
+	}
+	#hero{
+		background: url('1942.gif');
+		background-position: -85px -180px;
+		width:28px;
+		height:28px;
+		position:absolute;
+	}
+	.enemy1{
+		background: url('1942.gif');
+		background-position: -30px -10px;
+		width:28px;
+		height:28px;
+		position:absolute;
+	}
+	.bullet{
+		background: url('1942.gif');
+		background-position: -185px -400px;
+		width:18px;
+		height:18px;
+		position:absolute;
+	}
+	#score{
+		position:absolute;
+		border:10px solid red;
+		top:20px;
+		left:800px;
+		background-color:white;
+		padding:10px;
+		font-size:30px;
+		font-family: Arial;
+	}
+</style>
+</head>
+<body>
+	<div id='container'>
+		<div id='hero'></div>
+		<div id='enemies'></div>
+		<div id='bullets'>
+		</div>
+	</div>
+
+	<div id='score'></div>
+
+<!--
+	1. Display the hero - DONE
+	2. Make the hero move up/down/left/right - DONE
+	3. Display all the enemies - DONE
+	4. Make the enemies move - DONE
+	5. When spacebar is pressed, have the hero shoot a bullet - DONE
+	6. ...
+-->
+
+<script>
+
+	var score = 0;
+
+	var hero = {
+		x: 300,
+		y: 500
+	}
+
+	var enemies = [
+		{x:50, y:50},
+		{x:250, y:50},
+		{x:450, y:250},
+		{x:450, y:250},
+		{x:450, y:250},
+		{x:450, y:250},
+		{x:550, y:250}
+	]
+
+	// when the spacebar is pressed, add a new bullet into this array
+	var bullets = [];
+
+	function displayHero(){
+		document.getElementById('hero').style['top'] = hero.y + "px";
+		document.getElementById('hero').style['left'] = hero.x + "px";
+	}
+
+	function displayEnemies(){
+		var output = '';
+		for (var i in enemies){
+			output += "<div class='enemy1' style='top:"+ enemies[i].y +"px; left:"+ enemies[i].x +"px;'></div>"
+		}
+		document.getElementById('enemies').innerHTML = output;
+	}
+
+	function moveEnemies(){
+		for (var i in enemies){
+			enemies[i].y += 5;
+
+			if (enemies[i].y > 540){
+				enemies[i].y = 0;
+				enemies[i].x = Math.random()*500;
+			}
+		}
+	}
+
+	function moveBullets(){
+		for (var i in bullets){
+			bullets[i].y -= 5;
+
+			// for any bullet that goes out, get rid of it
+			if (bullets[i].y <0){
+				bullets[i] = bullets[bullets.length-1];
+				bullets.pop();
+				// console.log(bullets);
+			}
+		}
+	}
+
+	function displayBullets(){
+		var output = '';
+		for (var i in bullets){
+			output += "<div class='bullet' style='top:"+ bullets[i].y +"px; left:"+ bullets[i].x +"px;'></div>"
+		}
+		document.getElementById('bullets').innerHTML = output;
+
+	}
+
+	function displayScore(){
+		document.getElementById('score').innerHTML = score;
+	}
+
+	// every x milliseconds, tell browser to run this gameLoop function
+	function gameLoop(){
+		displayHero();
+		moveEnemies(); // moves enemies down by 5 px each time gameLoop() is run
+		displayEnemies();
+		moveBullets(); // move bullets up by 5 px each time
+		displayBullets();
+		detectCollision();
+		displayScore();
+	}
+
+	function detectCollision(){
+		for (var i in bullets){
+			for (var j in enemies){
+				if (Math.abs(bullets[i].x - enemies[j].x) < 10 && Math.abs(bullets[i].y - enemies[j].y) < 10){
+					// console.log('bullet', i, 'and enemy', j, "collided")
+					score += 10;
+					displayScore();
+				}
+			}
+		}
+	}
+
+	setInterval(gameLoop, 80);
+
+
+	// onto the document.onkeydown property, assign a function
+	// the browser, whenever it executes the function that is set on the property onkeydown, it will pass me an object "a" that i can use
+	// remember that the browser sends this information back
+	document.onkeydown = function(a){
+		// console.log(a.keyCode);
+
+		// left = 37
+		// right = 39
+		// up = 38
+		// down = 40
+		// spacebar = 32
+
+		if (a.keyCode == 37){
+			hero['x'] -= 28;
+		} else if (a.keyCode == 39){
+			hero['x'] += 28;
+		} else if (a.keyCode == 38){
+			hero['y'] -= 28;
+		} else if (a.keyCode == 40){
+			hero['y'] += 28;
+		} else if (a.keyCode == 32){
+			bullets.push({x:hero.x+8 , y:hero.y-15 })
+			displayBullets();
+		}
+	}
+
+
+</script>
+
+</body>
+</html>
